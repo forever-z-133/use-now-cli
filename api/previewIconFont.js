@@ -93,11 +93,11 @@ function renderHtml(result, input) {
     for (let fontFamily in result) {
       const list = result[fontFamily];
       _html += `<h1>${fontFamily}</h1>`;
-      _html += list.reduce((re, item) => {
+      _html += '<div style="display: flex;">' + list.reduce((re, item) => {
         const className = (item.key.match(/(?<=\.).+?(?=\:)/) || [])[0];
         if (!className) return re;
-        return re + `<span class="${fontFamily} ${className}"></span>`;
-      }, '');
+        return re + `<div><span class="${fontFamily} ${className}"></span><b>${className}</b></div>`;
+      }, '') + '</div>';
     }
     return _html;
   });
