@@ -1,0 +1,13 @@
+{
+  "name": "use-now-cli",
+  "version": "1.0.0",
+  "description": "使用 now 部署平台写些 serverless 应用",
+  "main": "index.html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/foreverZ133/use-now-cli.git"
+  },
+  "author": "foreverZ133.github.com",
+  "license": "ISC",
+  "homepage": "https://use-now-cli.617754841.now.sh/"
+}

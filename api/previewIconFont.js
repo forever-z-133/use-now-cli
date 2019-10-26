@@ -1,13 +1,14 @@
-const previewIconFont = require('../module/previewIconFont/index');
+const previewIconFont = require('../module/previewIconFont/index.js');
 
-module.exports = (req, res) => {
+module.exports = async (req, res, isTest) => {
   const {
     query: {
       url
     }
   } = req;
 
-  var html = previewIconFont(url);
+  var html = await previewIconFont(url);
 
+  if (isTest) return html;
   res.send(html);
 }

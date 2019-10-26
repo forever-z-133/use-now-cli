@@ -1,6 +1,7 @@
 const fs = require('fs');
+const path = require('path');
 
-export async function previewFont(input) {
+module.exports = async function previewFont(input) {
   const cssStr = await readFile(input);
   const cssObj = cssStrToCssObject(cssStr);
   
@@ -41,7 +42,7 @@ export async function previewFont(input) {
     return re;
   }, {});  // 获得 { 'Glyphicons Halflings': [] } 的结果
 
-  const newHtml = renderHtml(result, newHtmlPath);
+  const newHtml = renderHtml(result, input);
   return newHtml;
 }
 
@@ -69,8 +70,8 @@ function readFile(url, callback) {
 }
 
 // 渲染 html 模板并生成新 html
-function renderHtml(result) {
-  let html = fs.readFileSync('./tpl.html', 'utf8');
+function renderHtml(result, input) {
+  let html = fs.readFileSync(path.join(__dirname, './tpl.html'), 'utf8');
   html = html.replace('{{cssPath}}', input);
   html = html.replace('{{iconsTemplate}}', function() {
     let _html = '';
