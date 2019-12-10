@@ -9,5 +9,12 @@
   },
   "author": "foreverZ133.github.com",
   "license": "ISC",
-  "homepage": "https://use-now-cli.617754841.now.sh/"
+  "homepage": "https://use-now-cli.617754841.now.sh/",
+  "scripts": {
+    "test": "node test/previewIconFont.js"
+  },
+  "devDependencies": {
+    "cross-spawn": "^7.0.1",
+    "temp-write": "^4.0.0"
+  }
 }

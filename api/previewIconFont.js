@@ -2,25 +2,24 @@ const fs = require('fs');
 
 module.exports = async (req, res, isTest) => {
   const {
-    query: {
-      url
-    }
+    query: { url }
   } = req;
 
   var html = await previewIconFont(url);
 
   if (isTest) return html;
   res.send(html);
-}
+};
 
 async function previewIconFont(input) {
   const cssStr = await readFile(input);
+  if (!cssStr) return console.error('未获取到内容');
   const cssObj = cssStrToCssObject(cssStr);
-  
-  const fonts = [];  // 带有字体名称的集合
-  const conts = [];  // 带有 font-family 的集合
-  const icons = [];  // 带有 :before{ content: '\000f' } 的集合
-  forEachDeep(cssObj, 'child', (item) => {
+
+  const fonts = []; // 带有字体名称的集合
+  const conts = []; // 带有 font-family 的集合
+  const icons = []; // 带有 :before{ content: '\000f' } 的集合
+  forEachDeep(cssObj, 'child', item => {
     if (item.key.indexOf('@font-face') > -1) {
       fonts.push(item);
     } else if (item.attrs && (item.attrs.font || item.attrs['font-family'])) {
@@ -34,51 +33,56 @@ async function previewIconFont(input) {
     }
   });
 
-  const iconfont = [];  // 含有字体名称的类名，比如 .glyphicon
+  const iconfont = []; // 含有字体名称的类名，比如 .glyphicon
   conts.forEach(item => {
     const fontFamily = item.attrs && (item.attrs.font || item.attrs['font-family']);
     var inner = fonts.some(font => {
       const fontFamily2 = font.attrs && font.attrs['font-family'];
       return fontFamily.includes(fontFamily2);
-    })
+    });
     if (inner) {
       iconfont.push(item);
     }
   });
 
   const result = iconfont.reduce((re, item) => {
-    const fontFamily = (item.key.match(/(?<=\.).+?(?=\b)/) || [])[0];
+    const fontFamily = (item.key.match(/(?<=\.|'|").+?(?='|"|$)/) || [])[0];
     re[fontFamily] = icons.reduce((res, icon) => {
-      return icon.key.includes(item.key) ? res.concat([icon]) : res;
+      return icon.key.includes(fontFamily) ? res.concat([icon]) : res;
     }, []);
     return re;
-  }, {});  // 获得 { 'Glyphicons Halflings': [] } 的结果
+  }, {}); // 获得 { 'Glyphicons Halflings': [] } 的结果
 
   const newHtml = renderHtml(result, input);
   return newHtml;
 }
 
 function readFile(url, callback) {
-  return new Promise((resolve) => {
-    const isHttps = /^https/.test(url);
-    const isHttp = /^http/.test(url);
-    if (isHttps || isHttp) {
-      ajax = isHttps ? require('https') : require('http');
-      ajax.get(url, (res) => {
+  return new Promise(resolve => {
+    const netType = fileNetType(url);
+    if (netType === 'https' || netType === 'http') {
+      ajax = netType === 'https' ? require('https') : require('http');
+      ajax.get(url, res => {
         let body = '';
-        res.on('data', (chunk) => body += chunk);
+        res.on('data', chunk => (body += chunk));
         res.on('end', () => {
-          const result = body.toString();
+          const result = body.toString('utf8');
           callback && callback(result);
           resolve(result);
         });
       });
     } else {
-      const result = fs.readFileSync(url);
+      const result = fs.readFileSync(url).toString('utf8');
       callback && callback(result);
       resolve(result);
     }
   });
+}
+
+function fileNetType(url) {
+  if (/^https/.test(url)) return 'https';
+  if (/^http/.test(url)) return 'http';
+  return 'file';
 }
 
 // 渲染 html 模板并生成新 html
@@ -107,16 +111,18 @@ function renderHtml(result, input) {
 
 // css 字符串转 json 格式
 function cssStrToCssObject(cssStr) {
-	cssStr = cssStr.replace(/\s*[\t\n]\s*/g, ''); // 去掉换行
+  cssStr = cssStr.replace(/\s*[\t\n]\s*/g, ''); // 去掉换行
   cssStr = cssStr.replace(/\/\*.*?\*\//g, ''); // 去除注释
-  
+
   const reg = /(?<=^|}|{)\s*([^}{]*?)\s*{(([^}]*?{.*?})|([a-z\-]*?:.*?(?=;|}))*)}/g;
   const cssObj = (function loop(str, res) {
     str.replace(reg, (match, key, attrs, child) => {
-      if (child) { // @media{.b{x:1}} 形态的
+      if (child) {
+        // @media{.b{x:1}} 形态的
         child = loop(child, []);
         attrs = void 0;
-      } else if (attrs) { // .a{x:1} 形态的
+      } else if (attrs) {
+        // .a{x:1} 形态的
         attrs = stringToObject(attrs, /\s*;\s*/, /\s*:\s*/);
       }
       res.push({ key, attrs, child });
@@ -147,7 +153,7 @@ function stringToObject(str, divide, concat) {
   divide = divide || '&';
   concat = concat || '=';
   var arr = str.split(divide);
-  return arr.reduce(function (re, item) {
+  return arr.reduce(function(re, item) {
     if (!item) return re;
     var temp = item.split(concat);
     var key = temp.shift().trim();
