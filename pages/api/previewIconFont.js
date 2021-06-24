@@ -1,9 +1,17 @@
 const fs = require('fs');
 
+const getQuery = (key, req) => {
+  if (req.body && req.body[key]) {
+    return req.body[key]
+  } else if (req.query[key]) {
+    return req.query[key]
+  } else if (req.cookies[key]) {
+    return req.cookies[key]
+  }
+}
+
 module.exports = async (req, res, isTest) => {
-  const {
-    query: { url }
-  } = req;
+  const url = getQuery('url', req);
 
   var html = await previewIconFont(url);
 

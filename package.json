@@ -9,12 +9,22 @@
   },
   "author": "foreverZ133.github.com",
   "license": "ISC",
-  "homepage": "https://use-now-cli.617754841.now.sh/",
+  "homepage": "https://now.forever-z.cn/",
   "scripts": {
-    "test": "node test/previewIconFont.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "export": "next export"
+  },
+  "dependencies": {
+    "next": "11.0.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "cross-spawn": "^7.0.1",
-    "temp-write": "^4.0.0"
+    "eslint": "7.29.0",
+    "eslint-config-next": "11.0.1",
+    "next": "^11.0.1"
   }
 }
