@@ -1,14 +1,5 @@
 const fs = require('fs');
-
-const getQuery = (key, req) => {
-  if (req.body && req.body[key]) {
-    return req.body[key]
-  } else if (req.query[key]) {
-    return req.query[key]
-  } else if (req.cookies[key]) {
-    return req.cookies[key]
-  }
-}
+const { getQuery } = require('./utils/index.js');
 
 module.exports = async (req, res, isTest) => {
   const url = getQuery('url', req);
